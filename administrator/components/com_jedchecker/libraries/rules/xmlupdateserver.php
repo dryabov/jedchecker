@@ -60,16 +60,14 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 
 		if (!$packageFile)
 		{
-			$XMLFiles = $this->findXMLPaths($files);
+			$this->findXMLPaths($files);
 		}
-
-		return true;
 	}
 
 	/**
 	 * Reads a file and searches for package xml file
 	 *
-	 * @param   string  $files  - The path to the file
+	 * @param   string[]  $files  - The path to the file
 	 *
 	 * @return boolean True if the package xml file was found, otherwise False.
 	 */
@@ -82,10 +80,10 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 			$xml = simplexml_load_file($file);
 
 			// Check if this is an XML and an extension manifest
-			if ($xml && ($xml->getName() == 'install' || $xml->getName() == 'extension'))
+			if ($xml && ($xml->getName() === 'install' || $xml->getName() === 'extension'))
 			{
 				// Check if extension attribute 'type' is for a package
-				if($xml->attributes()->type == 'package')
+				if ((string) $xml['type'] === 'package')
 				{
 					$packageCount++;
 					$this->find($file);
@@ -93,19 +91,14 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 			}
 		}
 
-		// No XML file found for package
-		if ($packageCount == 0)
-		{
-			return false;
-		} else {
-			return true;
-		}
+		// False if no XML file found for package
+		return ($packageCount > 0);
 	}
 
 	/**
 	 * Reads a file and searches for paths of xml files
 	 *
-	 * @param   string  $files  - The path to the file
+	 * @param   string[]  $files  - The path to the file
 	 *
 	 * @return void
 	 */
@@ -119,19 +112,19 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 			$xml = simplexml_load_file($file);
 
 			// Check if this is an XML and an extension manifest
-			if ($xml && ($xml->getName() == 'install' || $xml->getName() == 'extension'))
+			if ($xml && ($xml->getName() === 'install' || $xml->getName() === 'extension'))
 			{
-				$directories = explode('/', substr($file, 0, strrpos( $file, '/')));
+				$directories = explode('/', substr($file, 0, strrpos($file, '/')));
 				$XMLFiles[] = array(
 					'type' => (string) $xml->attributes()->type,
 					'filepath' => $file,
-					'directoryPath' => substr($file, 0, strrpos( $file, '/')),
+					'directoryPath' => substr($file, 0, strrpos($file, '/')),
 					'directory' => trim(end($directories))
 				);
 
-				if ($xml->attributes()->type == 'component')
+				if ((string) $xml->attributes()->type === 'component')
 				{
-					$componentPaths[] = substr($file, 0, strrpos( $file, '/'));
+					$componentPaths[] = substr($file, 0, strrpos($file, '/'));
 				}
 			}
 		}
@@ -139,11 +132,12 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 		foreach ($XMLFiles as $XMLFile)
 		{
 			// Always check component XML files for update servers
-			if ($XMLFile['type'] == 'component')
+			if ((string) $XMLFile['type'] === 'component')
 			{
 				$this->find($XMLFile['filepath']);
-
-			} else {
+			}
+			else
+			{
 				// If not component, check if XML is nested inside component folder.
 				$nested = false;
 
@@ -155,13 +149,12 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 					}
 				}
 
-				if (!$nested){
+				if (!$nested)
+				{
 					$this->find($XMLFile['filepath']);
 				}
 			}
 		}
-
-		return true;
 	}
 
 
@@ -185,7 +178,7 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 
 		// Check if this is an extension manifest
 		// 1.5 uses 'install', 1.6 uses 'extension'
-		if ($xml->getName() != 'install' && $xml->getName() != 'extension')
+		if ($xml->getName() !== 'install' && $xml->getName() !== 'extension')
 		{
 			return true;
 		}
@@ -204,7 +197,6 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 			$this->report->addError($file, JText::_('COM_JEDCHECKER_ERROR_XML_UPDATE_SERVER_NOT_FOUND'));
 
 			return false;
-
 		}
 
 		// Check if server tag(s) contain valid links
@@ -215,12 +207,12 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 				$this->report->addError($file, JText::_('COM_JEDCHECKER_ERROR_XML_UPDATE_SERVER_LINK_NOT_FOUND'));
 
 				return false;
-
-			} else {
+			}
+			else
+			{
 				$this->report->addInfo($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_UPDATE_SERVER_LINK', (string) $server));
 			}
 		}
-
 
 		// All checks passed. Return true
 		return true;

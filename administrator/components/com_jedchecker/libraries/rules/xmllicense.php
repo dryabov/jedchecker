@@ -18,7 +18,7 @@ require_once JPATH_COMPONENT_ADMINISTRATOR . '/models/rule.php';
 /**
  * class JedcheckerRulesXMLlicense
  *
- * This class searches all xml manifestes for a valid license.
+ * This class searches all xml manifests for a valid license.
  *
  * @since  1.0
  */
@@ -83,7 +83,7 @@ class JedcheckerRulesXMLlicense extends JEDcheckerRule
 
 		// Check if this is an extension manifest
 		// 1.5 uses 'install', 1.6 uses 'extension'
-		if ($xml->getName() != 'install' && $xml->getName() != 'extension')
+		if ($xml->getName() !== 'install' && $xml->getName() !== 'extension')
 		{
 			return true;
 		}

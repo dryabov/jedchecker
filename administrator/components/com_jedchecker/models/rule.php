@@ -112,10 +112,9 @@ class JEDcheckerRule extends JObject
 		$file_name = str_replace('jedcheckerrules', '', strtolower(get_class($this)));
 		$params_file = JPATH_COMPONENT_ADMINISTRATOR . '/libraries/rules/' . $file_name . '.ini';
 
+		// $params = $registry->getInstance('jedchecker.rule.' . $file_name);
+		// $params = Joomla\Registry\Registry::getInstance('jedchecker.rule.' . $file_name);
 		$params = new Registry('jedchecker.rule.' . $file_name);
-		//$params = $registry->getInstance('jedchecker.rule.' . $file_name);
-
-		//$params = Joomla\Registry\Registry::getInstance('jedchecker.rule.' . $file_name);
 
 		// Load the params from the ini file
 		if (file_exists($params_file))

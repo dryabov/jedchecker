@@ -69,7 +69,7 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 	 *
 	 * @param   string  $file  - The path to the file
 	 *
-	 * @return bool True on success, otherwise False.
+	 * @return boolean True on success, otherwise False.
 	 */
 	protected function find($file)
 	{
@@ -210,12 +210,13 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 			}
 
 			// Count %... formats in the string
-			$count1 = preg_match_all('/(?<=^|[^%])%(?=[-+0 ]?\w)/', $value);
+			$countAll = preg_match_all('/(?<=^|[^%])%(?=[-+0 ]?\w)/', $value);
 
 			// Count %n$... (argnum) formats in the string
-			$count2 = preg_match_all('/(?<=^|[^%])%\d+\$/', $value);
+			$countArgnum = preg_match_all('/(?<=^|[^%])%\d+\$/', $value);
 
-			if ($count1 > 1 && $count2 < $count1) {
+			if ($countAll > 1 && $countArgnum < $countAll)
+			{
 				// @todo It's not mentioned in docs
 				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_RECOMMEND_ARGNUM'), $startLineno, $line);
 			}

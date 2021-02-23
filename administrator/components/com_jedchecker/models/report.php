@@ -25,8 +25,8 @@ class JEDcheckerReport extends JObject
 	/**
 	 * Contains the report data.
 	 *
-	 * @see    reset
 	 * @var    array
+	 * @see    reset
 	 */
 	protected $data;
 
@@ -188,10 +188,12 @@ class JEDcheckerReport extends JObject
 			{
 				$html[] = $this->formatItems($this->data['errors'], 'danger');
 			}
+
 			// Go through the warning list
 			if ($this->data['count']->warning > 0)
 			{
 				$html[] = $this->formatItems($this->data['warning'], 'warning');
+			}
 
 			// Go through the compat list
 			if ($this->data['count']->compat > 0)
@@ -225,7 +227,7 @@ class JEDcheckerReport extends JObject
 		{
 			$item->location = str_replace($this->basedir, '', $item->location);
 
-			if ($item->location == '')
+			if ($item->location === '')
 			{
 				$item->location = '/';
 			}
