@@ -1,6 +1,22 @@
 <?php defined('_JEXEC') or die(); ?>
 
 =====================================================================
+JED Checker 3.0.0 - Released ??-???-2021
+=====================================================================
+
+^ Updated UI
++ Support of Joomla! 4.0
++ Rule XML Manifests
++ Rule XML Files references
++ Rule Language files
++ New inspections in INFO_XML rule
+- Support all GPL-compatible and OSI-approved licenses in GPL rule
+# Fixed false-positives in Framework rule
+# Fixed false-positives in JAMSS rule
+# Fixed false-positives in Encodings rule
+- Other minor changes/improvements
+
+=====================================================================
 JED Checker 2.1.1 - 2.1.2 - Released 10-March-2019
 =====================================================================
 
