@@ -21,7 +21,7 @@ require_once JPATH_COMPONENT_ADMINISTRATOR . '/models/rule.php';
  *
  * This class searches all xml manifests for valid files declarations
  *
- * @since  2.3
+ * @since  3.0
  */
 class JedcheckerRulesXMLFiles extends JEDcheckerRule
 {

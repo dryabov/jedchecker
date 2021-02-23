@@ -21,7 +21,7 @@ require_once JPATH_COMPONENT_ADMINISTRATOR . '/models/rule.php';
  *
  * This class validates language ini file
  *
- * @since  2.3
+ * @since  3.0
  */
 class JedcheckerRulesLanguage extends JEDcheckerRule
 {
