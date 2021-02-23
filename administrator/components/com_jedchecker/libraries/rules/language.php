@@ -75,6 +75,7 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 	{
 		$lines = file($file);
 		$nLines = count($lines);
+		$keys = array();
 
 		for ($lineno = 0; $lineno < $nLines; $lineno++)
 		{
@@ -131,6 +132,15 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 			{
 				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_RESERVED'), $startLineno, $line);
 				continue;
+			}
+
+			if (isset($keys[$key]))
+			{
+				$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_LANG_KEY_DUPLICATED', $keys[$key]), $startLineno, $line);
+			}
+			else
+			{
+				$keys[$key] = $startLineno;
 			}
 
 			// Validate value
