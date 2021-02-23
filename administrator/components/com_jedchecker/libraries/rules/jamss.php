@@ -339,18 +339,33 @@ class JedcheckerRulesJamss extends JEDcheckerRule
 					{
 						$count++;
 
+						foreach ($all_results as $match)
+						{
+							// Output the line of malware code, but sanitize it before
+							// The offset is in $match[1]
+							$offset = $match[1];
+							$start = strrpos($content, "\n", $offset - strlen($content));
+
+							if ($start === false)
+							{
+								$start = 0;
+							}
+
+							$end = strpos($content, "\n", $offset);
+
+							if ($end === false)
+							{
+								$end = strlen($content);
+							}
+
+							$first_code = substr($content, $start, min($end - $start, 200));
+							$first_line = $this->calculate_line_number($offset, $content);
+							break;
+						}
+
 						if (is_array($pattern))
 						{
 							// Then it has some additional comments
-							foreach ($all_results as $match)
-							{
-								// Output the line of malware code, but sanitize it before
-								// The offset is in $match[1]
-								$first_code = substr($content, $match[1], 200);
-								$first_line = $this->calculate_line_number($match[1], $content);
-								break;
-							}
-
 							$this->jamssWarning(
 									$path,
 									JText::_('COM_JEDCHECKER_ERROR_JAMSS_PATTERN') . "#$pattern[2] - $pattern[1]",
@@ -362,16 +377,6 @@ class JedcheckerRulesJamss extends JEDcheckerRule
 						else
 						{
 							// It's a string, no comments available
-							$first_content = "";
-
-							foreach ($all_results as $match)
-							{
-								// Output the line of malware code, but sanitize it before
-								$first_code = substr($content, $match[1], 200);
-								$first_line = $this->calculate_line_number($match[1], $content);
-								break;
-							}
-
 							$this->jamssWarning(
 									$path,
 									JText::_('COM_JEDCHECKER_ERROR_JAMSS_STRING') . $pattern,
@@ -418,7 +423,6 @@ class JedcheckerRulesJamss extends JEDcheckerRule
 	private function jamssWarning($path, $title, $info, $code, $line)
 	{
 		$info = !empty($info)?sprintf($this->params->get('info'), htmlentities($info, ENT_QUOTES)):"";
-		$code = !empty($code)?sprintf($this->params->get('code'), htmlentities($code, ENT_QUOTES)):"";
-		$this->report->addWarning($path, $info . $code . $title, $line);
+		$this->report->addWarning($path, $info . $title, $line, $code);
 	}
 }

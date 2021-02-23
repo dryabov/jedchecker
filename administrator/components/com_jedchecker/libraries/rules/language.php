@@ -88,14 +88,12 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 			}
 			if ($line[0] === '#')
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_INCORRECT_COMMENT') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_INCORRECT_COMMENT'), $lineno, $line);
 				continue;
 			}
 			if (strpos($line, '=') === false)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_WRONG_LINE') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_WRONG_LINE'), $lineno, $line);
 				continue;
 			}
 			list ($key, $value) = explode('=', $line, 2);
@@ -103,55 +101,47 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 			$key = rtrim($key);
 			if ($key === '')
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_EMPTY') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_EMPTY'), $lineno, $line);
 				continue;
 			}
 			if (strpos($key, ' ') !== false)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_WHITESPACE') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_WHITESPACE'), $lineno, $line);
 				continue;
 			}
 			if (strpbrk($key, '{}|&~![()^"') !== false)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_INVALID_CHARACTER') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_INVALID_CHARACTER'), $lineno, $line);
 				continue;
 			}
 			if (in_array($key, array('null', 'yes', 'no', 'true', 'false', 'on', 'off', 'none'), true))
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_RESERVED') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_RESERVED'), $lineno, $line);
 				continue;
 			}
 			$value = ltrim($value);
 			if (strlen($value) <2 || $value[0] !== '"' || substr($value, -1) !== '"')
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_QUOTES') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_QUOTES'), $lineno, $line);
 				continue;
 			}
 			if ($value === '""')
 			{
-				$this->report->addWarning($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_EMPTY') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addWarning($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_EMPTY'), $lineno, $line);
 				continue;
 			}
 
 			$value = substr($value, 1, -1);
 			if (strpos($value, '"_QQ_"') !== false)
 			{
-				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_QQ_DEPRECATED') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_QQ_DEPRECATED'), $lineno, $line);
 			}
 
 			$count1 = preg_match_all('/(?<=^|[^%])%(?=[-+0 ]?\w)/', $value);
 			$count2 = preg_match_all('/(?<=^|[^%])%\d+\$/', $value);
 			if ($count1 > 1 && $count2 < $count1) {
 				// @todo It's not mentioned in docs
-				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_RECOMMEND_ARGNUM') .
-					'<br>' . htmlspecialchars($line), $lineno);
+				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_RECOMMEND_ARGNUM'), $lineno, $line);
 			}
 		}
 
