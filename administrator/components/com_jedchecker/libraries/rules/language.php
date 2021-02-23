@@ -170,7 +170,7 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 
 			if ($value === '""')
 			{
-				$this->report->addWarning($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_EMPTY'), $startLineno, $line);
+				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_EMPTY'), $startLineno, $line);
 				continue;
 			}
 
@@ -184,7 +184,7 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 
 			if (strpos($value, '"_QQ_"') !== false)
 			{
-				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_QQ_DEPRECATED'), $startLineno, $line);
+				$this->report->addCompat($file, JText::_('COM_JEDCHECKER_LANG_QQ_DEPRECATED'), $startLineno, $line);
 			}
 
 			// Count %... formats in the string
