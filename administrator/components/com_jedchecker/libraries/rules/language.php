@@ -74,74 +74,118 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 	protected function find($file)
 	{
 		$lines = file($file);
-		foreach ($lines as $lineno => $line)
+		$nLines = count($lines);
+
+		for ($lineno = 0; $lineno < $nLines; $lineno++)
 		{
-			$line = trim($line);
+			$startLineno = $lineno + 1;
+			$line = trim($lines[$lineno]);
+
 			if ($lineno === 0 && strncmp($line, "\xEF\xBB\xBF", 3) === 0)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_BOM_FOUND'), 1);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_BOM_FOUND'), $startLineno);
 				$line = substr($line, 3);
 			}
+
 			if ($line === '' || $line[0] === ';' || $line[0] === '[')
 			{
 				continue;
 			}
+
 			if ($line[0] === '#')
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_INCORRECT_COMMENT'), $lineno, $line);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_INCORRECT_COMMENT'), $startLineno, $line);
 				continue;
 			}
+
 			if (strpos($line, '=') === false)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_WRONG_LINE'), $lineno, $line);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_WRONG_LINE'), $startLineno, $line);
 				continue;
 			}
+
 			list ($key, $value) = explode('=', $line, 2);
 
+			// Validate key
 			$key = rtrim($key);
+
 			if ($key === '')
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_EMPTY'), $lineno, $line);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_EMPTY'), $startLineno, $line);
 				continue;
 			}
+
 			if (strpos($key, ' ') !== false)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_WHITESPACE'), $lineno, $line);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_WHITESPACE'), $startLineno, $line);
 				continue;
 			}
+
 			if (strpbrk($key, '{}|&~![()^"') !== false)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_INVALID_CHARACTER'), $lineno, $line);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_INVALID_CHARACTER'), $startLineno, $line);
 				continue;
 			}
+
 			if (in_array($key, array('null', 'yes', 'no', 'true', 'false', 'on', 'off', 'none'), true))
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_RESERVED'), $lineno, $line);
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_KEY_RESERVED'), $startLineno, $line);
 				continue;
 			}
+
+			// Validate value
 			$value = ltrim($value);
-			if (strlen($value) <2 || $value[0] !== '"' || substr($value, -1) !== '"')
+
+			// Parse multiline values
+			while (!preg_match('/^((?>\'(?>[^\'\\\\]+|\\\\.)*\'|"(?>[^"\\\\]+|\\\\.)*"|[^\'";]+)*)(;.*)?$/', $value, $matches))
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_QUOTES'), $lineno, $line);
+				if ($lineno + 1 >= $nLines)
+				{
+					break;
+				}
+
+				$lineno++;
+				$chunk = "\n" . trim($lines[$lineno]);
+				$line .= $chunk;
+				$value .= $chunk;
+			}
+
+			if (!isset($matches[0]))
+			{
+				$this->report->addWarning($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_ERROR'), $startLineno, $line);
 				continue;
 			}
+
+			$value = trim($matches[1]);
+
 			if ($value === '""')
 			{
-				$this->report->addWarning($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_EMPTY'), $lineno, $line);
+				$this->report->addWarning($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_EMPTY'), $startLineno, $line);
+				continue;
+			}
+
+			if (strlen($value) < 2 || $value[0] !== '"' || substr($value, -1) !== '"')
+			{
+				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_TRANSLATION_QUOTES'), $startLineno, $line);
 				continue;
 			}
 
 			$value = substr($value, 1, -1);
+
 			if (strpos($value, '"_QQ_"') !== false)
 			{
-				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_QQ_DEPRECATED'), $lineno, $line);
+				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_QQ_DEPRECATED'), $startLineno, $line);
 			}
 
+			// Count %... formats in the string
 			$count1 = preg_match_all('/(?<=^|[^%])%(?=[-+0 ]?\w)/', $value);
+
+			// Count %n$... (argnum) formats in the string
 			$count2 = preg_match_all('/(?<=^|[^%])%\d+\$/', $value);
+
 			if ($count1 > 1 && $count2 < $count1) {
 				// @todo It's not mentioned in docs
-				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_RECOMMEND_ARGNUM'), $lineno, $line);
+				$this->report->addInfo($file, JText::_('COM_JEDCHECKER_LANG_RECOMMEND_ARGNUM'), $startLineno, $line);
 			}
 		}
 
