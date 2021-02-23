@@ -205,8 +205,9 @@ class JedcheckerRulesGpl extends JEDcheckerRule
 			$lineno = substr_count($content, "\n", 0, $match[0][1]) + 1;
 			$this->report->addInfo(
 				$file,
-				JText::_('COM_JEDCHECKER_PH1_LICENSE_FOUND') . ':' . '<strong>' . $match[0][0] . '</strong>',
-				$lineno
+				JText::_('COM_JEDCHECKER_PH1_LICENSE_FOUND'),
+				$lineno,
+				$match[0][0]
 			);
 
 			return true;
@@ -217,8 +218,9 @@ class JedcheckerRulesGpl extends JEDcheckerRule
 			$lineno = substr_count($content, "\n", 0, $match[0][1]) + 1;
 			$this->report->addInfo(
 				$file,
-				JText::_('COM_JEDCHECKER_GPL_COMPATIBLE_LICENSE_WAS_FOUND') . ':' . '<strong>' . $match[0][0] . '</strong>',
-				$lineno
+				JText::_('COM_JEDCHECKER_GPL_COMPATIBLE_LICENSE_WAS_FOUND'),
+				$lineno,
+				$match[0][0]
 			);
 
 			return true;
