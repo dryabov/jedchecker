@@ -84,7 +84,15 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 
 			if ($lineno === 0 && strncmp($line, "\xEF\xBB\xBF", 3) === 0)
 			{
-				$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_BOM_FOUND'), $startLineno);
+				if (isset($line[3]) && strpos(";\n\r", $line[3]) === false)
+				{
+					$this->report->addError($file, JText::_('COM_JEDCHECKER_LANG_BOM_FOUND'), $startLineno);
+				}
+				else
+				{
+					$this->report->addWarning($file, JText::_('COM_JEDCHECKER_LANG_BOM_FOUND'), $startLineno);
+				}
+
 				$line = substr($line, 3);
 			}
 
