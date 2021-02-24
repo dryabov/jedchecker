@@ -1,4 +1,5 @@
 joomla.org
+joomla.com
 
 hotjoomlatemplates.com
 joomlanl.nl
