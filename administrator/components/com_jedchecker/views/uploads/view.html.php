@@ -94,7 +94,7 @@ class JedcheckerViewUploads extends JViewLegacy
 			JToolbarHelper::custom('check', 'search', 'search', JText::_('COM_JEDCHECKER_TOOLBAR_CHECK'), false);
 		}
 
-		JToolbarHelper::title('JED checker');
+		JToolbarHelper::title(JText::_('COM_JEDCHECKER'));
 
 		if (file_exists($this->path))
 		{
