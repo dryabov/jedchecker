@@ -61,6 +61,13 @@ class JedcheckerRulesXMLManifest extends JEDcheckerRule
 	protected $warnings;
 
 	/**
+	 * List of infos.
+	 *
+	 * @var    string[]
+	 */
+	protected $infos;
+
+	/**
 	 * Rules for XML nodes
 	 *   ? - single, optional
 	 *   = - single, required, warning if missed
@@ -155,6 +162,7 @@ class JedcheckerRulesXMLManifest extends JEDcheckerRule
 
 		$this->errors = array();
 		$this->warnings = array();
+		$this->infos = array();
 
 		// Validate manifest
 		$this->validateXml($xml, 'extension');
@@ -167,6 +175,11 @@ class JedcheckerRulesXMLManifest extends JEDcheckerRule
 		if (count($this->warnings))
 		{
 			$this->report->addWarning($file, implode('<br />', $this->warnings));
+		}
+
+		if (count($this->infos))
+		{
+			$this->report->addInfo($file, implode('<br />', $this->infos));
 		}
 
 		// All checks passed. Return true
@@ -192,7 +205,7 @@ class JedcheckerRulesXMLManifest extends JEDcheckerRule
 
 				if (!in_array($attrName, $DTDattributes, true))
 				{
-					$this->warnings[] = JText::sprintf('COM_JEDCHECKER_MANIFEST_UNKNOWN_ATTRIBUTE', $name, $attrName);
+					$this->infos[] = JText::sprintf('COM_JEDCHECKER_MANIFEST_UNKNOWN_ATTRIBUTE', $name, $attrName);
 				}
 			}
 		}
@@ -203,7 +216,7 @@ class JedcheckerRulesXMLManifest extends JEDcheckerRule
 			// No children
 			if ($node->count() > 0)
 			{
-				$this->warnings[] = JText::sprintf('COM_JEDCHECKER_MANIFEST_UNKNOWN_CHILDREN', $name);
+				$this->infos[] = JText::sprintf('COM_JEDCHECKER_MANIFEST_UNKNOWN_CHILDREN', $name);
 			}
 		}
 		elseif (!isset($this->DTDNodeRules[$name]['*']))
@@ -256,7 +269,7 @@ class JedcheckerRulesXMLManifest extends JEDcheckerRule
 			{
 				if (!isset($DTDchildren[$child]))
 				{
-					$this->warnings[] = JText::sprintf('COM_JEDCHECKER_MANIFEST_UNKNOWN_CHILD', $name, $child);
+					$this->infos[] = JText::sprintf('COM_JEDCHECKER_MANIFEST_UNKNOWN_CHILD', $name, $child);
 				}
 				else
 				{
