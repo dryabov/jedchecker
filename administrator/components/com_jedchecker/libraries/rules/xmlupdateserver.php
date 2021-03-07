@@ -80,7 +80,7 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 			$xml = simplexml_load_file($file);
 
 			// Check if this is an XML and an extension manifest
-			if ($xml && ($xml->getName() === 'install' || $xml->getName() === 'extension'))
+			if ($xml && $xml->getName() === 'extension')
 			{
 				// Check if extension attribute 'type' is for a package
 				if ((string) $xml['type'] === 'package')
@@ -178,7 +178,7 @@ class JedcheckerRulesXMLUpdateServer extends JEDcheckerRule
 
 		// Check if this is an extension manifest
 		// 1.5 uses 'install', 1.6 uses 'extension'
-		if ($xml->getName() !== 'install' && $xml->getName() !== 'extension')
+		if ($xml->getName() !== 'extension')
 		{
 			return true;
 		}
