@@ -95,6 +95,12 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 		}
 
 		$lines = file($file);
+
+		if ($lines === false)
+		{
+			return false;
+		}
+
 		$nLines = count($lines);
 		$keys = array();
 
