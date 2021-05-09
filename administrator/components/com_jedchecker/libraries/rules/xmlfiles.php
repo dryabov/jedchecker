@@ -63,12 +63,42 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		// Find all XML files of the extension
 		$files = JFolder::files($this->basedir, '\.xml$', true, true);
 
+		$exclude_list = $this->generateExcludeList($files);
+
 		// Iterate through all the xml files
 		foreach ($files as $file)
 		{
-			// Try to check the file
-			$this->find($file);
+			if (!in_array($file, $exclude_list))
+			{
+				// Try to check the file
+				$this->find($file);
+			}
 		}
+	}
+
+	/**
+	 * Generates a list of component's manifest files to exclude
+	 *
+	 * @param   array  $files  - List of XML manifests
+	 *
+	 * @return array
+	 */
+	protected function generateExcludeList($files)
+	{
+		$exclude_list = array();
+
+		foreach ($files as $file)
+		{
+			$xml = simplexml_load_file($file);
+
+			if ($xml && $xml->getName() === 'extension' &&
+				(string) $xml['type'] === 'component' && isset($xml->administration->files['folder']))
+			{
+				$exclude_list[] = dirname($file) . '/' . trim($xml->administration->files['folder'], ' /') . '/' . basename($file);
+			}
+		}
+
+		return $exclude_list;
 	}
 
 	/**
