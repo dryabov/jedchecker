@@ -278,7 +278,6 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 
 				case 'plugin':
 					$group = (string) $xml['group'];
-
 					$extensionPath = 'plugins/' . $group . '/' . $element . '/';
 					break;
 
