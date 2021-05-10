@@ -162,6 +162,8 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 
 		$this->validateDomain($file, (string) $xml->authorUrl);
 
+		$type = (string) $xml['type'];
+
 		if ($type === 'package' && (string) $xml->packagerurl !== (string) $xml->authorUrl)
 		{
 			$this->validateDomain($file, (string) $xml->packagerurl);
