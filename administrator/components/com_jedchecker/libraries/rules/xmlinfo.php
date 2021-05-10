@@ -145,13 +145,19 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_VERSION', $extensionName));
 		}
 
+		// Check for "Joomla" in the name
 		if (stripos($extensionName, 'joomla') === 0)
 		{
 			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_JOOMLA', $extensionName));
 		}
-		elseif (stripos($extensionName, 'joom') !== false)
+		else
 		{
-			$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_JOOMLA_DERIVATIVE', $extensionName));
+			$cleanName = preg_replace('/\s+for\s+Joomla!?$/', '', $extensionName);
+
+			if (stripos($cleanName, 'joom') !== false)
+			{
+				$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_JOOMLA_DERIVATIVE', $extensionName));
+			}
 		}
 
 		$this->validateDomain($file, (string) $xml->authorUrl);
