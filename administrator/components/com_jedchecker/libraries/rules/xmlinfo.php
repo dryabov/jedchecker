@@ -181,6 +181,7 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 			$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_TOO_LONG', $extensionName));
 		}
 
+		// Validate URLs
 		$this->validateDomain($file, (string) $xml->authorUrl);
 
 		$type = (string) $xml['type'];
