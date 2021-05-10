@@ -113,108 +113,11 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 			return false;
 		}
 
-		// Get extension name (element)
-
-		$type = (string) $xml['type'];
-
-		if (isset($xml->element))
-		{
-			$extension = (string) $xml->element;
-		}
-		else
-		{
-			$extension = (string) $xml->name;
-
-			if (isset($xml->files))
-			{
-				foreach ($xml->files->children() as $child)
-				{
-					if (isset($child[$type]))
-					{
-						$extension = (string) $child[$type];
-					}
-				}
-			}
-		}
-
-		$extension = strtolower(JFilterInput::getInstance()->clean($extension, 'cmd'));
-
-		if ($type === 'component' && strpos($extension, 'com_') !== 0)
-		{
-			$extension = 'com_' . $extension;
-		}
-
-		if ($type === 'plugin' && isset($xml['group']))
-		{
-			$extension = 'plg_' . $xml['group'] . '_' . $extension;
-		}
-
 		// Load the language of the extension (if any)
-		$lang = JFactory::getLanguage();
-
-		// Search for .sys.ini translation file
-		$langDir = dirname($file);
-		$langTag = 'en-GB';
-
-		$lookupLangDirs = array();
-
-		if (isset($xml->administration->files['folder']))
-		{
-			$lookupLangDirs[] = trim($xml->administration->files['folder'], '/') . '/language/' . $langTag;
-		}
-
-		if (isset($xml->files['folder']))
-		{
-			$lookupLangDirs[] = trim($xml->files['folder'], '/') . '/language/' . $langTag;
-		}
-
-		$lookupLangDirs[] = 'language/' . $langTag;
-
-		if (isset($xml->administration->languages))
-		{
-			$folder = trim($xml->administration->languages['folder'], '/');
-
-			foreach ($xml->administration->languages->language as $language)
-			{
-				if (trim($language['tag']) === $langTag)
-				{
-					$lookupLangDirs[] = trim($folder . '/' . dirname($language), '/');
-				}
-			}
-		}
-
-		if (isset($xml->languages))
-		{
-			$folder = trim($xml->languages['folder'], '/');
-
-			foreach ($xml->languages->language as $language)
-			{
-				if (trim($language['tag']) === $langTag)
-				{
-					$lookupLangDirs[] = trim($folder . '/' . dirname($language), '/');
-				}
-			}
-		}
-
-		$lookupLangDirs[] = '';
-
-		$lookupLangDirs = array_unique($lookupLangDirs);
-
-		// Looking for language file in specified directories
-		foreach ($lookupLangDirs as $dir)
-		{
-			$langSysFile = $langDir . '/' . ($dir === '' ? '' : $dir . '/') . $langTag . '.' . $extension . '.sys.ini';
-
-			if (is_file($langSysFile))
-			{
-				$loadLanguage = new ReflectionMethod($lang, 'loadLanguage');
-				$loadLanguage->setAccessible(true);
-				$loadLanguage->invoke($lang, $langSysFile, $extension);
-				break;
-			}
-		}
+		$this->loadExtensionLanguage($xml, dirname($file));
 
 		// Get the real extension's name now that the language has been loaded
+		$lang = JFactory::getLanguage();
 		$extensionName = $lang->_((string) $xml->name);
 
 		$info[] = JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_XML', $extensionName);
@@ -283,6 +186,115 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 
 		// All checks passed. Return true
 		return true;
+	}
+
+	/**
+	 * Locate and load extension's .sys.ini translation file
+	 *
+	 * @param   SimpleXMLElement  $xml      Extension's XML manifest
+	 * @param   string            $langDir  The basepath
+	 * @param   string            $langTag  The language to load
+	 *
+	 * @return  void
+	 * @since   3.0
+	 */
+	protected function loadExtensionLanguage($xml, $langDir, $langTag = 'en-GB')
+	{
+		// Get extension name (element)
+		$type = (string) $xml['type'];
+
+		if (isset($xml->element))
+		{
+			$extension = (string) $xml->element;
+		}
+		else
+		{
+			$extension = (string) $xml->name;
+
+			if (isset($xml->files))
+			{
+				foreach ($xml->files->children() as $child)
+				{
+					if (isset($child[$type]))
+					{
+						$extension = (string) $child[$type];
+					}
+				}
+			}
+		}
+
+		$extension = strtolower(JFilterInput::getInstance()->clean($extension, 'cmd'));
+
+		if ($type === 'component' && strpos($extension, 'com_') !== 0)
+		{
+			$extension = 'com_' . $extension;
+		}
+
+		if ($type === 'plugin' && isset($xml['group']))
+		{
+			$extension = 'plg_' . $xml['group'] . '_' . $extension;
+		}
+
+		// Load the language of the extension (if any)
+		$lang = JFactory::getLanguage();
+
+		$lookupLangDirs = array();
+
+		if (isset($xml->administration->files['folder']))
+		{
+			$lookupLangDirs[] = trim($xml->administration->files['folder'], '/') . '/language/' . $langTag;
+		}
+
+		if (isset($xml->files['folder']))
+		{
+			$lookupLangDirs[] = trim($xml->files['folder'], '/') . '/language/' . $langTag;
+		}
+
+		$lookupLangDirs[] = 'language/' . $langTag;
+
+		if (isset($xml->administration->languages))
+		{
+			$folder = trim($xml->administration->languages['folder'], '/');
+
+			foreach ($xml->administration->languages->language as $language)
+			{
+				if (trim($language['tag']) === $langTag)
+				{
+					$lookupLangDirs[] = trim($folder . '/' . dirname($language), '/');
+				}
+			}
+		}
+
+		if (isset($xml->languages))
+		{
+			$folder = trim($xml->languages['folder'], '/');
+
+			foreach ($xml->languages->language as $language)
+			{
+				if (trim($language['tag']) === $langTag)
+				{
+					$lookupLangDirs[] = trim($folder . '/' . dirname($language), '/');
+				}
+			}
+		}
+
+		$lookupLangDirs[] = '';
+
+		$lookupLangDirs = array_unique($lookupLangDirs);
+
+		// Looking for language file in specified directories
+		foreach ($lookupLangDirs as $dir)
+		{
+			$langSysFile = $langDir . '/' . ($dir === '' ? '' : $dir . '/') . $langTag . '.' . $extension . '.sys.ini';
+
+			if (is_file($langSysFile))
+			{
+				$loadLanguage = new ReflectionMethod($lang, 'loadLanguage');
+				$loadLanguage->setAccessible(true);
+				$loadLanguage->invoke($lang, $langSysFile, $extension);
+				break;
+			}
+		}
 	}
 
 	/**
