@@ -73,12 +73,12 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		// Find all XML files of the extension
 		$files = JFolder::files($this->basedir, '\.xml$', true, true);
 
-		$exclude_list = $this->generateExcludeList($files);
+		$excludeList = $this->generateExcludeList($files);
 
 		// Iterate through all the xml files
 		foreach ($files as $file)
 		{
-			if (!in_array($file, $exclude_list))
+			if (!in_array($file, $excludeList))
 			{
 				// Try to check the file
 				$this->find($file);
@@ -95,20 +95,21 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 	 */
 	protected function generateExcludeList($files)
 	{
-		$exclude_list = array();
+		$excludeList = array();
 
 		foreach ($files as $file)
 		{
 			$xml = simplexml_load_file($file);
 
-			if ($xml && $xml->getName() === 'extension' &&
-				(string) $xml['type'] === 'component' && isset($xml->administration->files['folder']))
+			if ($xml && $xml->getName() === 'extension'
+				&& (string) $xml['type'] === 'component'
+				&& isset($xml->administration->files['folder']))
 			{
-				$exclude_list[] = dirname($file) . '/' . trim($xml->administration->files['folder'], ' /') . '/' . basename($file);
+				$excludeList[] = dirname($file) . '/' . trim($xml->administration->files['folder'], ' /') . '/' . basename($file);
 			}
 		}
 
-		return $exclude_list;
+		return $excludeList;
 	}
 
 	/**
