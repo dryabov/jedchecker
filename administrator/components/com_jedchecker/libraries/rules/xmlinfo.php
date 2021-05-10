@@ -16,6 +16,9 @@ defined('_JEXEC') or die('Restricted access');
 // Include the rule base class
 require_once JPATH_COMPONENT_ADMINISTRATOR . '/models/rule.php';
 
+// Include the helper class
+require_once JPATH_COMPONENT_ADMINISTRATOR . '/libraries/helper.php';
+
 
 /**
  * class JedcheckerRulesXMLinfo
@@ -228,34 +231,9 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 	protected function loadExtensionLanguage($xml, $langDir, $langTag = 'en-GB')
 	{
 		// Get extension name (element)
+		$extension = JEDCheckerHelper::getElementName($xml);
+
 		$type = (string) $xml['type'];
-
-		if (isset($xml->element))
-		{
-			$extension = (string) $xml->element;
-		}
-		else
-		{
-			$extension = (string) $xml->name;
-
-			if (isset($xml->files))
-			{
-				foreach ($xml->files->children() as $child)
-				{
-					if (isset($child[$type]))
-					{
-						$extension = (string) $child[$type];
-					}
-				}
-			}
-		}
-
-		$extension = strtolower(JFilterInput::getInstance()->clean($extension, 'cmd'));
-
-		if ($type === 'component' && strpos($extension, 'com_') !== 0)
-		{
-			$extension = 'com_' . $extension;
-		}
 
 		if ($type === 'plugin' && isset($xml['group']))
 		{
