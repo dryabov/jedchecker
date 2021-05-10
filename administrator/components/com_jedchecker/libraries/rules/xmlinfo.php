@@ -127,15 +127,16 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 		$this->report->addInfo($file, implode('<br />', $info));
 
 		// NM3 - Listing name contains “module” or “plugin”
-		if (preg_match('/\b(?:module|plugin)\b/i', $extensionName))
+		// (and other reserved words)
+		if (preg_match('/\b(?:module|plugin|component|template|extension|free)\b/i', $extensionName, $match))
 		{
-			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_MODULE_PLUGIN', $extensionName));
+			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_RESERVED_KEYWORDS', $extensionName, strtolower($match[0])));
 		}
 
-		// The "template" is reserved keyword
-		if (stripos($extensionName, 'template') !== false)
+		// Extension name shouldn't start with extension type prefix
+		if (preg_match('/^\s*(?:mod|com|plg|tpl|pkg)_/i', $extensionName))
 		{
-			$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_RESERVED_KEYWORDS', $extensionName));
+			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_PREFIXED', $extensionName));
 		}
 
 		// NM5 - Version in name/title
