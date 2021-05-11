@@ -71,7 +71,7 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 	{
 		// Find all XML files of the extension
 		// @todo Load only main xml files and extra manifests from package
-		$files = JFolder::files($this->basedir, '\.xml$', true, true);
+		$files = JEDCheckerHelper::findManifests($this->basedir);
 
 		$manifestFound = false;
 

@@ -71,45 +71,14 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 	public function check()
 	{
 		// Find all XML files of the extension
-		$files = JFolder::files($this->basedir, '\.xml$', true, true);
-
-		$excludeList = $this->generateExcludeList($files);
+		$files = JEDCheckerHelper::findManifests($this->basedir);
 
 		// Iterate through all the xml files
 		foreach ($files as $file)
 		{
-			if (!in_array($file, $excludeList))
-			{
-				// Try to check the file
-				$this->find($file);
-			}
+			// Try to check the file
+			$this->find($file);
 		}
-	}
-
-	/**
-	 * Generates a list of component's manifest files to exclude
-	 *
-	 * @param   array  $files  - List of XML manifests
-	 *
-	 * @return array
-	 */
-	protected function generateExcludeList($files)
-	{
-		$excludeList = array();
-
-		foreach ($files as $file)
-		{
-			$xml = simplexml_load_file($file);
-
-			if ($xml && $xml->getName() === 'extension'
-				&& (string) $xml['type'] === 'component'
-				&& isset($xml->administration->files['folder']))
-			{
-				$excludeList[] = dirname($file) . '/' . trim($xml->administration->files['folder'], ' /') . '/' . basename($file);
-			}
-		}
-
-		return $excludeList;
 	}
 
 	/**
@@ -126,12 +95,6 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		// Failed to parse the xml file.
 		// Assume that this is not a extension manifest
 		if (!$xml)
-		{
-			return false;
-		}
-
-		// Check if this is an extension manifest
-		if ($xml->getName() !== 'extension')
 		{
 			return false;
 		}
