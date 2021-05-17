@@ -50,6 +50,13 @@ class JedcheckerRulesErrorreporting extends JEDcheckerRule
 	protected $description = 'COM_JEDCHECKER_RULE_ERRORREPORTING_DESC';
 
 	/**
+	 * The ordering value to sort rules in the menu.
+	 *
+	 * @var    integer
+	 */
+	public static $ordering = 800;
+
+	/**
 	 * Regular expression to look for error_reporting calls.
 	 *
 	 * @var    string

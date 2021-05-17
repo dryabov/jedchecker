@@ -47,6 +47,13 @@ class JedcheckerRulesGpl extends JEDcheckerRule
 	protected $description = 'COM_JEDCHECKER_RULE_PH1_DESC';
 
 	/**
+	 * The ordering value to sort rules in the menu.
+	 *
+	 * @var    integer
+	 */
+	public static $ordering = 500;
+
+	/**
 	 * Regular expression to match GPL licenses.
 	 *
 	 * @var    string
