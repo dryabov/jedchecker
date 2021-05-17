@@ -82,13 +82,20 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 
 		$manifestFound = false;
 
-		// Iterate through all the xml files
-		foreach ($files as $file)
+		if (count($files))
 		{
-			// Try to find the license
-			if ($this->find($file))
+			$topLevelDepth = substr_count($files[0], '/');
+
+			// Iterate through all the xml files
+			foreach ($files as $file)
 			{
-				$manifestFound = true;
+				$isTopLevel = substr_count($file, '/') === $topLevelDepth;
+
+				// Try to find the license
+				if ($this->find($file, $isTopLevel))
+				{
+					$manifestFound = true;
+				}
 			}
 		}
 
@@ -101,11 +108,12 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 	/**
 	 * Reads a file and searches for the license
 	 *
-	 * @param   string  $file  - The path to the file
+	 * @param   string  $file        - The path to the file
+	 * @param   bool    $isTopLevel  - Is the file located in the top-level manifests directory?
 	 *
 	 * @return boolean True if the manifest file was found, otherwise False.
 	 */
-	protected function find($file)
+	protected function find($file, $isTopLevel)
 	{
 		$xml = simplexml_load_file($file);
 
@@ -136,56 +144,59 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 
 		$this->report->addInfo($file, implode('<br />', $info));
 
-		// NM3 - Listing name contains “module” or “plugin”
-		// (and other reserved words)
-		if (preg_match('/\b(?:module|plugin|component|template|extension|free)\b/i', $extensionName, $match))
+		if ($isTopLevel)
 		{
-			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_RESERVED_KEYWORDS', $extensionName, strtolower($match[0])));
-		}
-
-		// Extension name shouldn't start with extension type prefix
-		if (preg_match('/^\s*(?:mod|com|plg|tpl|pkg)_/i', $extensionName))
-		{
-			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_PREFIXED', $extensionName));
-		}
-
-		// NM5 - Version in name/title
-		if (preg_match('/(?:\bversion\b|\d\.\d)/i', $extensionName))
-		{
-			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_VERSION', $extensionName));
-		}
-
-		// Check for "Joomla" in the name
-		if (stripos($extensionName, 'joomla') === 0)
-		{
-			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_JOOMLA', $extensionName));
-		}
-		else
-		{
-			$cleanName = preg_replace('/\s+for\s+Joomla!?$/', '', $extensionName);
-
-			if (stripos($cleanName, 'joom') !== false)
+			// NM3 - Listing name contains “module” or “plugin”
+			// (and other reserved words)
+			if (preg_match('/\b(?:module|plugin|component|template|extension|free)\b/i', $extensionName, $match))
 			{
-				$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_JOOMLA_DERIVATIVE', $extensionName));
+				$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_RESERVED_KEYWORDS', $extensionName, strtolower($match[0])));
 			}
-		}
 
-		// Check extension name consists of ASCII characters only
-		if (preg_match('/[^\x20-\x7E]/', $extensionName))
-		{
-			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_NON_ASCII', $extensionName));
-		}
+			// Extension name shouldn't start with extension type prefix
+			if (preg_match('/^\s*(?:mod|com|plg|tpl|pkg)_/i', $extensionName))
+			{
+				$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_PREFIXED', $extensionName));
+			}
 
-		// Extension name shouldn't be too long
-		$nameLen = strlen($extensionName);
+			// NM5 - Version in name/title
+			if (preg_match('/(?:\bversion\b|\d\.\d)/i', $extensionName))
+			{
+				$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_VERSION', $extensionName));
+			}
 
-		if ($nameLen > 80)
-		{
-			$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_TOO_LONG', $extensionName));
-		}
-		elseif ($nameLen > 40)
-		{
-			$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_TOO_LONG', $extensionName));
+			// Check for "Joomla" in the name
+			if (stripos($extensionName, 'joomla') === 0)
+			{
+				$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_JOOMLA', $extensionName));
+			}
+			else
+			{
+				$cleanName = preg_replace('/\s+for\s+Joomla!?$/', '', $extensionName);
+
+				if (stripos($cleanName, 'joom') !== false)
+				{
+					$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_JOOMLA_DERIVATIVE', $extensionName));
+				}
+			}
+
+			// Check extension name consists of ASCII characters only
+			if (preg_match('/[^\x20-\x7E]/', $extensionName))
+			{
+				$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_NON_ASCII', $extensionName));
+			}
+
+			// Extension name shouldn't be too long
+			$nameLen = strlen($extensionName);
+
+			if ($nameLen > 80)
+			{
+				$this->report->addError($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_TOO_LONG', $extensionName));
+			}
+			elseif ($nameLen > 40)
+			{
+				$this->report->addWarning($file, JText::sprintf('COM_JEDCHECKER_INFO_XML_NAME_TOO_LONG', $extensionName));
+			}
 		}
 
 		// Validate URLs
@@ -208,7 +219,7 @@ class JedcheckerRulesXMLinfo extends JEDcheckerRule
 			}
 		}
 
-		if ($type === 'plugin')
+		if ($isTopLevel && $type === 'plugin')
 		{
 			$parts = explode(' - ', $extensionName, 2);
 			$extensionNameGroup = isset($parts[1]) ? strtolower(preg_replace('/\s/', '', $parts[0])) : false;
