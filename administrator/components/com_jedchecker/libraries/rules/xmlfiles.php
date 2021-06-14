@@ -64,6 +64,13 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 	protected $errors;
 
 	/**
+	 * List of warnings.
+	 *
+	 * @var    string[]
+	 */
+	protected $warnings;
+
+	/**
 	 * Manifest's directory
 	 *
 	 * @var    string
@@ -107,6 +114,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		}
 
 		$this->errors = array();
+		$this->warnings = array();
 
 		// Check declared files and folders do exist
 
@@ -121,7 +129,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 			$node = $xml->files;
 
 			// Get path to site files from "folder" attribute
-			$sitedir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$sitedir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->filename, $sitedir);
 			$this->checkFiles($node->file, $sitedir);
@@ -132,7 +140,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		if (isset($xml->media))
 		{
 			$node = $xml->media;
-			$dir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$dir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->filename, $dir);
 			$this->checkFiles($node->file, $dir);
@@ -143,7 +151,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		if (isset($xml->fonts))
 		{
 			$node = $xml->fonts;
-			$dir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$dir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->filename, $dir);
 			$this->checkFiles($node->file, $dir);
@@ -154,7 +162,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		if (isset($xml->languages))
 		{
 			$node = $xml->languages;
-			$dir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$dir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->language, $dir);
 		}
@@ -167,7 +175,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 			$node = $xml->administration->files;
 
 			// Get path to admin files from "folder" attribute
-			$admindir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$admindir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->filename, $admindir);
 			$this->checkFiles($node->file, $admindir);
@@ -178,7 +186,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		if (isset($xml->administration->media))
 		{
 			$node = $xml->administration->media;
-			$dir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$dir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->filename, $dir);
 			$this->checkFiles($node->file, $dir);
@@ -189,7 +197,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		if (isset($xml->administration->languages))
 		{
 			$node = $xml->administration->languages;
-			$dir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$dir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->language, $dir);
 		}
@@ -199,7 +207,7 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 		if (isset($xml->fileset->files))
 		{
 			$node = $xml->fileset->files;
-			$dir = isset($node['folder']) ? $node['folder'] . '/' : '';
+			$dir = $this->getSourceFolder($node);
 
 			$this->checkFiles($node->filename, $dir);
 			$this->checkFiles($node->file, $dir);
@@ -295,8 +303,39 @@ class JedcheckerRulesXMLFiles extends JEDcheckerRule
 			$this->report->addError($file, implode('<br />', $this->errors));
 		}
 
+		if (count($this->warnings))
+		{
+			$this->report->addWarning($file, implode('<br />', $this->warnings));
+		}
+
 		// All checks passed. Return true
 		return true;
+	}
+
+	/**
+	 * Get source folder for a node
+	 *
+	 * @param   SimpleXMLElement  $node  The node to check for "folder" attribute
+	 *
+	 * @return  string
+	 */
+	protected function getSourceFolder($node)
+	{
+		if (!isset($node['folder']))
+		{
+			return '';
+		}
+
+		$folder = (string) $node['folder'];
+
+		if (is_dir($this->basedir . $folder))
+		{
+			return $folder . '/';
+		}
+
+		$this->warnings[] = JText::sprintf('COM_JEDCHECKER_XML_FILES_FOLDER_NOT_FOUND', $folder);
+
+		return '';
 	}
 
 	/**
