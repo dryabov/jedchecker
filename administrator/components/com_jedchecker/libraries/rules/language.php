@@ -336,7 +336,7 @@ class JedcheckerRulesLanguage extends JEDcheckerRule
 			$countAll = preg_match_all('/(?<=^|[^%])%(?=[-+0 ]?\w)/', $value);
 
 			// Count numbered placeholders in the string (e.g. "%1s")
-			$count = preg_match_all('/(?<=^|[^%])%(\d+)\w/', $value, $matches);
+			$count = preg_match_all('/(?<=^|[^%])%(\d+)\w/', $value, $matches, PREG_SET_ORDER);
 
 			if ($count === $countAll && $count > 1)
 			{
