@@ -2,7 +2,7 @@
 /**
  * @package    Joomla.JEDChecker
  *
- * @copyright  Copyright (C) 2017 - 2019 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2022 Open Source Matters, Inc. All rights reserved.
  * 			   Copyright (C) 2008 - 2016 compojoom.com . All rights reserved.
  * @author     Daniel Dimitrov <daniel@compojoom.com>
  *
@@ -53,14 +53,23 @@ class JedcheckerViewUploads extends JViewLegacy
 	 */
 	public function getRules()
 	{
-		$rules = array();
-		$files = JFolder::files(JPATH_COMPONENT_ADMINISTRATOR . '/libraries/rules', '\.php$', false, false);
-
 		JLoader::discover('jedcheckerRules', JPATH_COMPONENT_ADMINISTRATOR . '/libraries/rules/');
 
+		$rules_list = array();
+
+		$files = JFolder::files(JPATH_COMPONENT_ADMINISTRATOR . '/libraries/rules', '\.php$', false, false);
 		foreach ($files as $file)
 		{
-			$rule = substr($file, 0, -4);
+			$rules_list[] = substr($file, 0, -4);
+		}
+
+		$extra_rules = JFactory::getApplication()->triggerEvent('onJedcheckerGetRules');
+		$rules_list = array_merge($rules_list, ...$extra_rules);
+
+		$rules = array();
+
+		foreach ($rules_list as $rule)
+		{
 			$class = 'jedcheckerRules' . ucfirst($rule);
 
 			if (class_exists($class) && is_subclass_of($class, 'JEDcheckerRule'))

@@ -2,7 +2,7 @@
 /**
  * @package    Joomla.JEDChecker
  *
- * @copyright  Copyright (C) 2017 - 2019 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2022 Open Source Matters, Inc. All rights reserved.
  * 			   Copyright (C) 2008 - 2016 compojoom.com . All rights reserved.
  * @author     Daniel Dimitrov <daniel@compojoom.com>
  *
@@ -33,6 +33,8 @@ class JedcheckerControllerPolice extends JControllerLegacy
 		$rule = JFactory::getApplication()->input->get('rule');
 
 		JLoader::discover('jedcheckerRules', JPATH_COMPONENT_ADMINISTRATOR . '/libraries/rules/');
+
+		JFactory::getApplication()->triggerEvent('onJedcheckerBeforeCheck');
 
 		$path  = JFactory::getConfig()->get('tmp_path') . '/jed_checker/unzipped';
 		$class = 'jedcheckerRules' . ucfirst($rule);
